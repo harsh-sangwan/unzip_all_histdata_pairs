@@ -47,6 +47,7 @@ session.mount('https://', adapter)
 r = session.get(url)
 soup = bs(r.content)
 
+all_quotes = []
 
 for links in soup.findAll('a'):
 
@@ -55,10 +56,12 @@ for links in soup.findAll('a'):
         href    = base_url + links['href']
         quote   = href.split('/')[-1]
 
+        all_quotes.append(quote)
         print(href)
         print(quote)
 
         quote_path = quote + '/'
+        
         if not os.path.exists(quote_path):
           os.makedirs(quote_path)
 
@@ -95,16 +98,18 @@ for links in soup.findAll('a'):
 
                 delete_except(quote_path, extension='.csv')
 
-        #downloaded all files for the pair
-        #merge all csv files
-        filenames = glob(quote_path+'*.csv')
-        df_append = pd.DataFrame()
-        for file in filenames:
-            df = pd.read_csv(file, sep=';', index_col=0, header=None,
-                             names=['Time', 'Open', 'High', 'Low', 'Close', 'unknown'])
-            df_append = df_append.append(df)
+#downloaded all files for the pair
+#merge all csv files
+for quote in all_quotes:
+    quote_path = quote + '/'
+    filenames = glob(quote_path+'*.csv')
+    df_append = pd.DataFrame()
+    for file in filenames:
+        df = pd.read_csv(file, sep=';', index_col=0, header=None,
+                         names=['Time', 'Open', 'High', 'Low', 'Close', 'unknown'])
+        df_append = df_append.append(df)
 
-        df_append = df_append.sort_index()
-        df.index = pd.to_datetime(df.index)
-        df.to_csv(quote_path+'merged_sorted.csv')
+    df_append = df_append.sort_index()
+    df.index = pd.to_datetime(df.index)
+    df.to_csv(quote_path+'merged_sorted.csv')
 
