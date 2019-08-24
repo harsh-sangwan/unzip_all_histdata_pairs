@@ -90,6 +90,8 @@ for links in soup.findAll('a'):
 
                 while os.path.exists('../../Downloads/'+filename) is False:
                   sleep(10)
+                  #if stuck for file
+                  #refresh using driver.navigate().refresh()
 
                 driver.close()
 
